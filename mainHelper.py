@@ -1,4 +1,5 @@
 import random
+import sys
 
 ALPHABET = ("A","C","G","T")
 
@@ -32,55 +33,89 @@ def AddStringOfSymbolsAtIndex(pattern, stringOfSymbols, index):
     return "".join(pattern)
 
 def AddStringOfSymbolsAtStart(pattern, stringOfSymbols):
-    if VERBOSE:
-        print("Initialising the string with " + str(len(stringOfSymbols)) + " symbol(s)")
+    printMessage(f"Initialising the string with {str(len(stringOfSymbols))} symbol(s)")
     return AddStringOfSymbolsAtIndex(pattern, stringOfSymbols, 0)
 
 def AddStringOfSymbolsAtEnd(pattern, stringOfSymbols):
     endOfString = len(pattern)
-    if VERBOSE:
-        print(f"Also adding the symbol(s) {str(stringOfSymbols)} at the end of the string")
+
+    printMessage(f"Also adding the symbol(s) {str(stringOfSymbols)} at the end of the string")
+
     return AddStringOfSymbolsAtIndex(pattern, stringOfSymbols, endOfString)
 
+# replaces a random number of symbols
 def ReplaceSymbols(pattern):
     numberOfSymbolsToBeReplaced = RandomInt(0, 2)
 
     if numberOfSymbolsToBeReplaced == 0:
-        if VERBOSE:
-            print("No symbols will be replaced/removed!")
+        printMessage("No symbols will be replaced/removed!")
         return pattern
     
-    if VERBOSE:
-            print("There will be " + str(numberOfSymbolsToBeReplaced)+ " symbol(s) replaced/removed")
+    printMessage(f"There will be {str(numberOfSymbolsToBeReplaced)} symbol(s) replaced/removed")
+
     randomIndices = []
     pattern = list(pattern)
+    patternLength = len(pattern)
     for _ in range(numberOfSymbolsToBeReplaced):
-        SelectAndReplaceUniqueIndex(pattern, randomIndices
-        )
+        SelectAndReplaceUniqueIndex(pattern, patternLength, randomIndices)
 
-    pattern = "".join(pattern)
+    pattern = "".join(pattern).replace("_", "")
     return pattern
 
-def SelectAndReplaceUniqueIndex(pattern, randomIndices):
-    randomIndex = RandomInt(0, len(pattern) - 1)
+# selects a random index and replaces the symbol at that index using ReplaceSymbolAtIndex()
+def SelectAndReplaceUniqueIndex(pattern, patternLength, randomIndices):
+    randomIndex = RandomInt(0, patternLength - 1)
 
     if randomIndex in randomIndices:
-        SelectAndReplaceUniqueIndex(pattern, randomIndices)
+        SelectAndReplaceUniqueIndex(pattern, patternLength, randomIndices)
         return 
     
     ReplaceSymbolAtIndex(pattern, randomIndex)
     randomIndices.append(randomIndex)
 
+# replaces the symbol at the index with a random symbol
+# if the symbol at the index is the same as the random symbol, it replaces it with "_" instead
 def ReplaceSymbolAtIndex(pattern, index):
     ramdomSymbol = GetRandomSymbol()
 
     if pattern[index] == ramdomSymbol: 
-        if VERBOSE:
-            print("Removing the symbol at index: " + str(index) + "(" + pattern[index] + ")")
-        pattern.pop(index)
+        printMessage(f"Removing the symbol at index: {str(index)}({pattern[index]})")
+        #pattern.pop(index)
+        pattern[index] = "_"
         return 
     
-    if VERBOSE:
-            print(f"Replacing the symbol at index: {str(index)}({pattern[index]}) with {ramdomSymbol}")
+    printMessage(f"Replacing the symbol at index: {str(index)}({pattern[index]}) with {ramdomSymbol}")
     pattern[index] = ramdomSymbol
     return 
+
+def SelectUniqueIndex(mainList, secondaryList):
+    randomIndex = RandomInt(0, 49)
+
+    if randomIndex in secondaryList:
+        SelectUniqueIndex(mainList, secondaryList)
+        return 
+    
+    secondaryList.append(randomIndex)
+
+def ReplaceIndexWithSymbol(listOfIndices, listOfSymbols):
+    for i in range(len(listOfIndices)):
+        listOfIndices[i] = listOfSymbols[listOfIndices[i]]
+        
+    return listOfIndices
+
+def printDatasets(datasetA, datasetB):
+    sys.stdout = open('datasetA.txt', 'w')
+    for i in range(len(datasetA)):
+        print(datasetA[i])
+
+    sys.stdout = open('datasetB.txt', 'w')
+    for i in range(len(datasetB)):
+        print(datasetB[i]) 
+
+def printMessage(message1, message2 = None):
+    if VERBOSE: 
+        if message2 is None:
+            print(message1)
+            return
+        print(message1)
+        print(message2)
