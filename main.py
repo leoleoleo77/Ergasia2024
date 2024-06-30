@@ -23,8 +23,8 @@ class StringGenerator:
             h.printMessage("-STEP C:\n", "Adding all the patterns to the initial string")
             self.string = h.AddStringOfSymbolsAtEnd(self.string, h.GenerateRandomStringOfSymbols(2))
             self.allStrings.append(self.string)
-            self.string = ""
             h.printMessage(f"Result: {self.string}\n", "Doing this another 49 times...\n")
+            self.string = ""
             h.VERBOSE = False
     
     def FillDatasets(self):

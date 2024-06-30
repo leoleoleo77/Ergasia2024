@@ -18,8 +18,8 @@ def RandomInt(start, end):
 def GetRandomSymbol():
     return ALPHABET[RandomInt(0, 3)]
 
-def GenerateRandomStringOfSymbols(n):
-    numberOfSymbols = RandomInt(1, n)
+def GenerateRandomStringOfSymbols(stringLength):
+    numberOfSymbols = RandomInt(1, stringLength)
     stringOfSymbols = ""
 
     for _ in range(numberOfSymbols):
