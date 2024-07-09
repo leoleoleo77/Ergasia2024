@@ -111,6 +111,8 @@ def printDatasets(datasetA, datasetB):
     sys.stdout = open('datasetB.txt', 'w')
     for i in range(len(datasetB)):
         print(datasetB[i]) 
+    
+    sys.stdout = sys.__stdout__
 
 def printMessage(message1, message2 = None):
     if VERBOSE: 
