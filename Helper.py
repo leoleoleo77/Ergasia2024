@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import sys
 
 ALPHABET = ("A","C","G","T")
@@ -121,3 +122,60 @@ def printMessage(message1, message2 = None):
             return
         print(message1)
         print(message2)
+
+def initializeScoreMatrix(n, m, gap):
+    scoreMatrix = np.zeros((n + 1, m + 1))
+
+    for i in range(n + 1):
+        scoreMatrix[i][0] = i * gap
+    for j in range(m + 1):
+        scoreMatrix[0][j] = j * gap
+    
+    return scoreMatrix
+
+def calculateScoreMatrix(n, m, seq1, seq2, match, mismatch, gap):
+    scoreMatrix = initializeScoreMatrix(n, m, gap)
+
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            diagonal_top_left_score = scoreMatrix[i - 1][j - 1] + (match if seq1[i - 1] == seq2[j - 1] else mismatch)
+            top_score = scoreMatrix[i - 1][j] + gap
+            left_score = scoreMatrix[i][j - 1] + gap
+            scoreMatrix[i][j] = max(diagonal_top_left_score, top_score, left_score)
+    
+    return scoreMatrix
+
+def backtracking(n, m, seq1, seq2, match, mismatch, gap, scoreMatrix):
+    align1 = ""
+    align2 = ""
+    i, j = n, m
+    while i > 0 or j > 0:
+        score_current = scoreMatrix[i][j]
+        score_diagonal = scoreMatrix[i - 1][j - 1]
+        # score_up = scoreMatrix[i][j - 1]
+        score_left = scoreMatrix[i - 1][j]
+        
+        # A diagonal arrow represents a match or mismatch, 
+        # so the letter of the column and the letter of the row of the origin cell will align.
+        if i > 0 and j > 0 and score_current == score_diagonal + (match if seq1[i - 1] == seq2[j - 1] else mismatch):
+            align1 += seq1[i - 1]
+            align2 += seq2[j - 1]
+            i -= 1
+            j -= 1
+        
+        # A horizontal or vertical arrow represents an indel.
+        # Vertical arrows will align a gap ("-") to the letter of the row (the "side" sequence),
+        # horizontal arrows will align a gap to the letter of the column (the "top" sequence).
+        elif i > 0 and score_current == score_left + gap:
+            align1 += seq1[i - 1]
+            align2 += "-"
+            i -= 1
+        else:
+            align1 += "-"
+            align2 += seq2[j - 1]
+            j -= 1
+
+    # Reverse the strings.
+    align1, align2 = align1[::-1], align2[::-1]
+    return align1, align2
+
