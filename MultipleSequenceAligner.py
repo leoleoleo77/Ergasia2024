@@ -1,5 +1,5 @@
 import numpy as np
-import StringGenerator as sg
+import SequenceGenerator as sg
 import Helper as h
 
 def needleman_wunsch(seq1, seq2, match=1, mismatch=-1, gap=-1):
@@ -10,6 +10,7 @@ def needleman_wunsch(seq1, seq2, match=1, mismatch=-1, gap=-1):
 
 x = needleman_wunsch("GATTACA", "GCATGCG")
 print(x)
+
 # def add_gaps_to_alignment(alignment):
 #     max_length = max(len(seq) for seq in alignment)
 #     new_alignment = []
