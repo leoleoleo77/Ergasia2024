@@ -4,7 +4,7 @@ import Helper as h
 
 MATCH = 1
 MISMATCH = -1
-GAP = -1
+GAP = -2
 
 class ScoreMatrix:
 
