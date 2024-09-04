@@ -2,6 +2,7 @@ import ScoreMatrix as sm
 import SequenceGenerator as sg
 import pandas as pd
 import Helper as h
+import GuideTree as gt
 
 
 data = sg.SequenceGenerator()
@@ -29,19 +30,17 @@ alignmentScores = dict(sorted(
     key=lambda item: item[1], 
     reverse=True))
 
-h.log("The matrix of distances (alignment scores) between each pair of sequences in order:")
-for pair in alignmentScores:
-    h.log(f"{str(pair)}: {alignmentScores[pair]}")
-
 MST = [] # Minimum Spanning Tree
-nodes = 0
+edges = 0
 
 for pair in alignmentScores:
+
     if len(MST) == 0:
-        h.log(f"Adding {pair} to the MST")
+        h.log(f"{str(pair)}: {alignmentScores[pair]} - Adding it to the MST")
         MST.append(pair)
-        nodes += 2
+        edges += 1
         continue
+
     nodeA, nodeB = pair
     nodeA_in_MST, nodeB_in_MST = (False, False)
     for edge in MST:
@@ -51,20 +50,61 @@ for pair in alignmentScores:
             nodeB_in_MST = True
     cycleCreated = nodeA_in_MST and nodeB_in_MST
     if not cycleCreated:
-        h.log(f"Adding {pair} to the MST")
+        h.log(f"{str(pair)}: {alignmentScores[pair]} - Adding it to the MST")
         MST.append(pair)
-        if nodeA_in_MST or nodeB_in_MST:
-            nodes += 1
-        else:
-            nodes += 2
-        if nodes == n - 1:
+        edges += 1
+        if edges == n - 1:
             break
     else:
-        h.log(f"Cycle created by {pair}, skipping")
+        h.log(f"{str(pair)}: {alignmentScores[pair]} Cycle created by it, skipping")
 
 h.log("The minimum spanning tree:")
 h.log(str(MST))
 
+guideTree = gt.GuideTree().construct(MST)
+h.log(guideTree.info())
 
+# 3. Do pairwise alignments according to the guide tree, working from the leaves to the root. 
+#    A node u with children v and w corresponds to an alignment of the leaves of v's subtree (already aligned inductively) 
+#    with the leaves of w's subtree (already aligned).
+#
+# Details of pairwise alignment
+#   Suppose V is an alignment of the sequences at the leaves of v's subtree, 
+#   and W is an alignment of the sequences at the leaves of w's subtree. 
+#   Let {a,b} be the pair of sequences that caused these subtrees to be merged, and let A be the optimal alignment of a and b. 
+#   Use A to guide the alignment of the two alignments V and W.
+
+def pairwise_alignment(tree):
+    for node in tree.nodes:
+        if not node.is_root(): continue
+        node.seq = iterate_tree(node)
+    print(tree.info())
+    
+
+def iterate_tree(root):
+    if not root.has_children():
+        return data.datasetA[root.i]
+    for child in root.children:
+        child.seq = iterate_tree(child)
+    return sequence_alignment(root)
+
+def sequence_alignment(root):
+    # Let {a,b} be the pair of sequences that caused these subtrees to be merged
+    rootOrigins = root.createdBy 
+    # and let A be the optimal alignment of a and b. 
+    optimalAlignment = sm.ScoreMatrix(rootOrigins[0].seq, rootOrigins[1].seq).alignedSequences()
+    rootOrigins[0].seq, rootOrigins[1].seq = optimalAlignment
+    for i in range(1):
+        for seq in [root.children[i].seq]:
+            if seq != rootOrigins[i].seq:
+                print("hi")
+                seq = sm.ScoreMatrix(seq, rootOrigins[i].seq).alignedSequences()
+
+    return optimalAlignment
+
+        
+
+
+pairwise_alignment(guideTree)
 
 

@@ -83,6 +83,9 @@ class ScoreMatrix:
     def score(self, i, j):
         return MATCH if self.seq1[i - 1] == self.seq2[j - 1] else MISMATCH
     
+    def alignedSequences(self):
+        return (self.seq1, self.seq2)
+    
     def log(self, message, matrix=None):
         if not ScoreMatrix.VERBOSE: 
             return
